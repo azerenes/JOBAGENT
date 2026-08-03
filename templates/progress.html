@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Başvurular — {{ s['meslek'] or 'CV Eşleşmesi' }}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
+</head>
+<body>
+<div class="container">
+  <h1>Başvurular — {{ s['meslek'] or 'CV Eşleşmesi' }} <span class="chip">{{ s['site'] }}</span></h1>
+  <div class="card" id="msj">İlerleme yükleniyor...</div>
+
+  <div class="bar"><div class="bar-fill" id="bar"></div></div>
+  <p class="sub" id="barmetni"></p>
+
+  <table class="liste">
+    <thead><tr><th>#</th><th>İlan</th><th>Firma</th><th>Yer</th><th>Durum</th></tr></thead>
+    <tbody id="tbody">
+      {% for j in s['jobs'] %}
+      <tr id="r-{{ loop.index }}" class="st-pending">
+        <td class="num">{{ loop.index }}</td>
+        <td class="baslik"><a href="{{ j['url'] }}" target="_blank">{{ j['title'] }}</a></td>
+        <td class="sirket">{{ j['company'] }}</td>
+        <td class="yer">{{ j['location'] }}</td>
+        <td class="durum-cell" id="d-{{ loop.index }}">{{ j['durum'] or 'bekliyor' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="toolbar" id="sonucbar" style="display:none">
+    <a href="{{ url_for('export', sid=s['sid']) }}" class="btn primary">Tikli Listeyi İndir (.html)</a>
+    <a href="/" class="btn ghost">Yeni arama</a>
+  </div>
+</div>
+<script>
+const sid = "{{ s['sid'] }}";
+const jobs = {{ s['jobs']|tojson }};
+const tbody = document.getElementById('tbody');
+const bar = document.getElementById('bar');
+const barmetni = document.getElementById('barmetni');
+const msj = document.getElementById('msj');
+const sonucbar = document.getElementById('sonucbar');
+
+function durumMap(d){
+  if(d === 'basvuru-alindi') return {cls:'st-ok', label:'✓ Başvuruldu'};
+  if(d === 'daha-once') return {cls:'st-once', label:'✓ Daha önce'};
+  if(d === 'giris-gerekli') return {cls:'st-warn', label:'⚠ Giriş gerekli'};
+  if(d === 'challenge') return {cls:'st-warn', label:'⚠ Challenge'};
+  if(d === 'belirsiz') return {cls:'st-warn', label:'⚠ Belirsiz'};
+  if(d && d.startsWith('hata')) return {cls:'st-err', label:'✗ ' + d};
+  return {cls:'st-pending', label:'bekliyor'};
+}
+
+async function poll(){
+  try{
+    const r = await fetch('/api/durum/' + sid);
+    const s = await r.json();
+    if(!s.ok) { msj.textContent = 'Oturum bulunamadı'; return; }
+    const p = s.progress || {};
+    const total = p.total || 0;
+    const done = p.done || 0;
+    const pct = total ? Math.round(done/total*100) : 0;
+    bar.style.width = pct + '%';
+    barmetni.textContent = (p.msg || '') + ' — ' + done + '/' + total;
+    s.jobs.forEach((j, i) => {
+      const cell = document.getElementById('d-' + (i+1));
+      const tr = document.getElementById('r-' + (i+1));
+      if(!cell) return;
+      const m = durumMap(j.durum);
+      cell.textContent = m.label;
+      tr.className = m.cls;
+    });
+    if(s.phase === 'bitti'){
+      msj.textContent = 'Başvurular tamamlandı.';
+      sonucbar.style.display = 'flex';
+      clearInterval(timer);
+    } else if(s.phase === 'hata'){
+      msj.textContent = 'Hata: ' + (s.error || '');
+      clearInterval(timer);
+    } else {
+      msj.textContent = (p.msg && !String(p.msg).startsWith('Başvurular tamamlandı')) ? p.msg : 'Başvurular sürüyor...';
+      if(String(p.msg||'').includes('giriş')) msj.className = 'card warn';
+    }
+  }catch(e){}
+}
+const timer = setInterval(poll, 1500);
+poll();
+</script>
+</body>
+</html>

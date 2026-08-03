@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tarayıcı Ayarları</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
+</head>
+<body>
+<div class="container narrow">
+  <h1>Tarayıcı Ayarları</h1>
+  <p class="sub">Otomasyon bir tarayıcı penceresi açar ve sitelere giriş yapmanızı ister. Oturumlar profil klasöründe saklanır.</p>
+
+  <form method="post" class="card">
+    <div class="field">
+      <label for="channel">Tarayıcı kanalı</label>
+      <select id="channel" name="channel">
+        <option value="" {% if not cfg['browser']['channel'] %}selected{% endif %}>Otomatik (Chrome/Edge/Chromium)</option>
+        <option value="chrome" {% if cfg['browser']['channel'] == 'chrome' %}selected{% endif %}>Google Chrome</option>
+        <option value="msedge" {% if cfg['browser']['channel'] == 'msedge' %}selected{% endif %}>Microsoft Edge</option>
+        <option value="chromium" {% if cfg['browser']['channel'] == 'chromium' %}selected{% endif %}>Playwright Chromium (kuruluysa)</option>
+      </select>
+      <div class="hint">Antibot'a takılan siteler için gerçek Chrome/Edge önerilir.</div>
+    </div>
+
+    <div class="field">
+      <label for="executable">Tarayıcı exe yolu (opsiyonel)</label>
+      <input type="text" id="executable" name="executable" value="{{ cfg['browser'].get('executable') }}" placeholder="örn. C:\Program Files\...\chrome.exe">
+    </div>
+
+    <div class="field">
+      <label for="profile">Profil klasörü (opsiyonel, boş = site başına ayrı profil)</label>
+      <input type="text" id="profile" name="profile" value="{{ cfg['browser'].get('profile') }}" placeholder="örn. C:\Users\X\AppData\...">
+    </div>
+
+    <div class="field">
+      <label for="city">Varsayılan şehir</label>
+      <input type="text" id="city" name="city" value="{{ cfg.get('city', 'ankara') }}">
+    </div>
+
+    <div class="field">
+      <label for="max_pages">Arama sayfa sayısı</label>
+      <input type="number" id="max_pages" name="max_pages" value="{{ cfg.get('max_pages', 2) }}" min="1" max="5">
+    </div>
+
+    <button type="submit" class="btn primary">Kaydet</button>
+    <a href="/" class="btn ghost">Geri</a>
+  </form>
+</div>
+</body>
+</html>

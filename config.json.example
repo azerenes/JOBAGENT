@@ -1,0 +1,11 @@
+{
+  "browser": {
+    "channel": "",
+    "executable": "",
+    "profile": ""
+  },
+  "city": "ankara",
+  "max_pages": 2,
+  "host": "127.0.0.1",
+  "port": 5000
+}

@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.spec
+
+# Sanal ortam
+.venv/
+
+# Calisma zamani verileri (profiller, oturumlar, CV'ler, cevap bankasi)
+data/
+
+# Derleme ciktisi
+dist/
+build/
+
+# Makineye ozel yapilandirma (ornek icin config.json.example kullanilir)
+config.json
+
+# Gecici / log
+*.log
+
+# Uretilen paketler
+JOBAGENT_paket.zip

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>İş Başvuru Otomasyonu — Kurulum</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
+</head>
+<body>
+<div class="container narrow">
+  <h1>İş Başvuru Otomasyonu</h1>
+  <p class="sub">CV'nizi ve mesleğinizi ekleyin, uygun iş ilanları otomatik listelensin. Dilediklerinizi seçip tek tıkla başvurun.</p>
+
+  <form method="post" action="/search" enctype="multipart/form-data" class="card">
+    <div class="field">
+      <label for="cv">CV Dosyanız (.pdf, .docx, .txt)</label>
+      <input type="file" id="cv" name="cv" accept=".pdf,.docx,.txt,.md">
+      <div class="hint">Yüklüyorsanız anahtar kelimeler otomatik çıkarılır. Yüklemek zorunlu değil.</div>
+    </div>
+
+    <div class="field">
+      <label for="meslek">Mesleğiniz / Arama kelimesi *</label>
+      <input type="text" id="meslek" name="meslek" placeholder="örn. Elektrik Teknisyeni" required>
+      <div class="hint">Zorunlu. Arama terimleri CV'nizden de çıkarılır; meslek ana terim olarak kullanılır.</div>
+    </div>
+
+    <div class="field">
+      <label for="site">İlan kaynağı</label>
+      <select id="site" name="site">
+        {% for key, label in sites %}
+        <option value="{{ key }}" {% if key == 'isinolsun' %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="sehir">Şehir</label>
+      <input type="text" id="sehir" name="sehir" value="{{ cfg.get('city', 'ankara') }}" placeholder="ankara">
+      <div class="hint">Siteye göre URL slug'ı kullanılır (örn. ankara, istanbul).</div>
+    </div>
+
+    <div class="field">
+      <label for="ek_kelime">Ek arama kelimeleri (virgülle ayırın)</label>
+      <input type="text" id="ek_kelime" name="ek_kelime" placeholder="örn. pano, otomasyon, zayıf akım">
+    </div>
+
+    <div class="field">
+      <label for="exclude">Hariç tutulacaklar (virgülle ayırın)</label>
+      <input type="text" id="exclude" name="exclude" placeholder="örn. mühendis, satış, şef">
+      <div class="hint">Başlığında bu kelimeler geçen ilanlar listeye alınmaz.</div>
+    </div>
+
+    <button type="submit" class="btn primary">İlanları Listele</button>
+    <a href="/config" class="btn ghost">Tarayıcı Ayarları</a>
+
+    <div class="note">
+      <strong>Önemli:</strong> Başvuru için seçilen sitelere (eleman.net, isinolsun.com,
+      kariyer.net) önceden giriş yapılmış olmalıdır. Giriş yoksa ilk başvuru sırasında
+      tarayıcıda giriş ekranı açılır ve akış sizin giriş yapmanızı bekler; oturum bir
+      sonraki çalıştırmalar için saklanır.
+    </div>
+  </form>
+</div>
+</body>
+</html>

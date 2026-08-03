@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sonuçlar — {{ s['meslek'] or 'CV Eşleşmesi' }}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
+</head>
+<body>
+<div class="container">
+  <h1>Sonuçlar — {{ s['meslek'] or 'CV Eşleşmesi' }} <span class="chip">{{ s['site'] }}</span></h1>
+  <p class="sub">Arama {{ s['sehir'] }} — {{ s['progress']['msg'] if s['phase'] == 'sonuc' else 'sürüyor...' }}</p>
+
+  <div id="durum" class="card warn" style="display:none">Yükleniyor...</div>
+
+  {% if s['phase'] in ('arama', 'hazir') %}
+  <div class="card warn" id="arama">
+    İlanlar listeleniyor, lütfen bekleyin...
+    <a href="{{ url_for('sonuc', sid=s['sid']) }}">Yenile</a>
+  </div>
+  {% else %}
+
+  <form method="post" action="{{ url_for('basvur', sid=s['sid']) }}">
+    <div class="toolbar">
+      <label class="select-all"><input type="checkbox" id="hepsi"> Tümünü seç (uygun olanlar)</label>
+      <button type="submit" class="btn primary" id="basvurBtn" disabled>Seçilenlere Başvur</button>
+      <span class="hint" id="sayac"></span>
+    </div>
+
+    <table class="liste">
+      <thead>
+        <tr><th></th><th>#</th><th>İlan</th><th>Firma</th><th>Yer</th><th>Eşleşme</th><th>Önceden</th></tr>
+      </thead>
+      <tbody>
+      {% for j in s['jobs'] %}
+        <tr class="st-{{ j['match_state'] }}">
+          <td>
+            {% if j['match_state'] != 'hariç' %}
+            <input type="checkbox" name="job_ids" value="{{ j['job_id'] }}" class="jobchk"
+                   {% if j['match_state'] == 'uygun' %}checked{% endif %}
+                   {% if j['durum'] in ('basvuru-alindi', 'daha-once') %}disabled{% endif %}>
+            {% endif %}
+          </td>
+          <td class="num">{{ loop.index }}</td>
+          <td class="baslik"><a href="{{ j['url'] }}" target="_blank">{{ j['title'] }}</a>
+            <div class="matched small">{{ j['matched']|join(', ') if j['matched'] }}</div>
+          </td>
+          <td class="sirket">{{ j['company'] }}</td>
+          <td class="yer">{{ j['location'] }}</td>
+          <td class="eslesme">
+            {% if j['match_state'] == 'uygun' %}<span class="badge ok">Uygun ({{ j['score'] }})</span>
+            {% elif j['match_state'] == 'dusuk' %}<span class="badge warn">Düşük ({{ j['score'] }})</span>
+            {% elif j['match_state'] == 'hariç' %}<span class="badge out">Hariç</span>
+            {% else %}<span class="badge none">Yok</span>{% endif %}
+          </td>
+          <td>
+            {% if j['applied'] %}<span class="badge once">Başvurulmuş</span>
+            {% elif j['durum'] %}<span class="badge warn">{{ j['durum'] }}</span>{% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="toolbar">
+      <button type="submit" class="btn primary">Seçilenlere Başvur</button>
+      <a href="/" class="btn ghost">Yeni arama</a>
+    </div>
+  </form>
+  {% endif %}
+</div>
+<script>
+const rows = document.querySelectorAll('.jobchk');
+const sel = document.querySelectorAll('input[name="job_ids"]:not(:disabled)');
+const btn = document.getElementById('basvurBtn');
+const say = document.getElementById('sayac');
+const hepsi = document.getElementById('hepsi');
+function upd(){
+  const n = document.querySelectorAll('input[name="job_ids"]:checked:not(:disabled)').length;
+  btn.disabled = n === 0;
+  say.textContent = n ? n + ' ilan seçildi' : '';
+}
+hepsi && hepsi.addEventListener('change', () => {
+  sel.forEach(c => c.checked = hepsi.checked);
+  upd();
+});
+sel.forEach(c => c.addEventListener('change', upd));
+upd();
+</script>
+</body>
+</html>
