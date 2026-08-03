@@ -7,7 +7,7 @@ echo ============================================
 if exist "JOBAGENT_paket.zip" del "JOBAGENT_paket.zip"
 tar -a -c -f JOBAGENT_paket.zip ^
   --exclude=.venv --exclude=data --exclude=dist --exclude=build ^
-  --exclude=__pycache__ --exclude="*.spec" --exclude="*.pyc" ^
+  --exclude=.git --exclude=__pycache__ --exclude="*.spec" --exclude="*.pyc" ^
   --exclude="*.log" ^
   . 
 if errorlevel 1 (
