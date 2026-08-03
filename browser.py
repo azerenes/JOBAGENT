@@ -101,6 +101,10 @@ class BrowserManager:
         channel = br.get('channel') or ''
         exe = br.get('executable') or ''
         profile = br.get('profile') or ''
+        if exe and not os.path.exists(exe):
+            # yapilandirilmis tarayici yolu degisti/kayboldu (Ornegin Opera guncellendi)
+            exe = ''
+            channel = ''
         if not channel and not exe:
             chrome = _find_chrome()
             if chrome and chrome.endswith('msedge.exe'):
@@ -132,7 +136,14 @@ class BrowserManager:
                 return self._contexts[site]
             self._start()
             kwargs = self._launch_kwargs(site)
-            ctx = self._pw.chromium.launch_persistent_context(**kwargs)
+            try:
+                ctx = self._pw.chromium.launch_persistent_context(**kwargs)
+            except Exception as e:
+                raise RuntimeError(
+                    f'Tarayıcı başlatılamadı ({type(e).__name__}). '
+                    f'Seçili tarayıcı/profil başka bir pencerede açık olabilir. '
+                    f'Tarayıcıyı kapatın veya config.json → "browser.profile" ayarını boşaltın.'
+                ) from e
             ctx.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined});")
             self._contexts[site] = ctx
             return ctx
