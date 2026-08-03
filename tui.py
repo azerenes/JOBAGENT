@@ -32,6 +32,7 @@ except Exception:
 CSS = """
 Screen { align: center top; padding: 1 2; }
 #wrap { width: 100%; max-width: 112; height: 100%; }
+#form { height: 1fr; overflow-y: auto; }
 .title { text-style: bold; color: $accent; text-align: center; margin-bottom: 1; }
 .hint { color: $text-muted; text-align: center; }
 .warn { color: $warning; text-align: center; }
@@ -54,23 +55,24 @@ class SetupScreen(Screen):
         cfg = load_config()
         with Vertical(id='wrap'):
             yield Static('JOBAGENT — İş Başvuru Otomasyonu', classes='title')
-            yield Label('1) Mesleğiniz / arama kelimesi *')
-            yield Input(placeholder='örn. Elektrik Teknisyeni', id='meslek')
-            yield Label('2) CV dosyası (.pdf / .docx / .txt)')
-            yield Input(placeholder='örn. C:\\Kullanıcılar\\...\\cv.pdf  (boş olabilir)', id='cv')
-            yield Label('Şehir (URL slug)')
-            yield Input(value=cfg.get('city', 'ankara'), id='sehir')
-            yield Label('Ek arama kelimeleri (virgülle, opsiyonel)')
-            yield Input(placeholder='örn. pano, otomasyon, zayıf akım', id='ek')
-            yield Label('Hariç tutulacaklar (virgülle, opsiyonel)')
-            yield Input(placeholder='örn. mühendis, satış, şef', id='exclude')
-            yield Label('3) Kaynak siteler (en az birini seçin)')
-            with Horizontal(id='sites'):
-                for key, adapter in ADAPTERS.items():
-                    yield Checkbox(adapter.label, id=f'site_{key}', value=(key == 'isinolsun'))
-            yield Static('ÖNEMLİ: Seçilen sitelere tarayıcıdan önceden giriş yapılmış olmalıdır '
-                         '(eleman.net, isinolsun.com, kariyer.net hesabıyla). Giriş yoksa başvuru '
-                         'sırasında pencere açılıp giriş istenir ve akış bekler.', classes='warn')
+            with Vertical(id='form'):
+                yield Label('1) Mesleğiniz / arama kelimesi *')
+                yield Input(placeholder='örn. Elektrik Teknisyeni', id='meslek')
+                yield Label('2) CV dosyası (.pdf / .docx / .txt)')
+                yield Input(placeholder='örn. C:\\Kullanıcılar\\...\\cv.pdf  (boş olabilir)', id='cv')
+                yield Label('Şehir (URL slug)')
+                yield Input(value=cfg.get('city', 'ankara'), id='sehir')
+                yield Label('Ek arama kelimeleri (virgülle, opsiyonel)')
+                yield Input(placeholder='örn. pano, otomasyon, zayıf akım', id='ek')
+                yield Label('Hariç tutulacaklar (virgülle, opsiyonel)')
+                yield Input(placeholder='örn. mühendis, satış, şef', id='exclude')
+                yield Label('3) Kaynak siteler (en az birini seçin)')
+                with Horizontal(id='sites'):
+                    for key, adapter in ADAPTERS.items():
+                        yield Checkbox(adapter.label, id=f'site_{key}', value=(key == 'isinolsun'))
+                yield Static('ÖNEMLİ: Seçilen sitelere tarayıcıdan önceden giriş yapılmış olmalıdır '
+                             '(eleman.net, isinolsun.com, kariyer.net hesabıyla). Giriş yoksa başvuru '
+                             'sırasında pencere açılıp giriş istenir ve akış bekler.', classes='warn')
             yield Button('Uygun İşleri Bul', variant='primary', id='start')
             yield Static('İpucu: sekmelerle dolaşın · ok/Enter ile gezinin · Ctrl+Q çıkış', classes='hint')
         yield Footer()
