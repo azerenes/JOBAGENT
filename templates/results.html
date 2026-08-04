@@ -33,13 +33,12 @@
       </thead>
       <tbody>
       {% for j in s['jobs'] %}
+      {% if j['match_state'] != 'hariç' %}
         <tr class="st-{{ j['match_state'] }}">
           <td>
-            {% if j['match_state'] != 'hariç' %}
             <input type="checkbox" name="job_ids" value="{{ j['job_id'] }}" class="jobchk"
                    {% if j['match_state'] == 'uygun' %}checked{% endif %}
                    {% if j['durum'] in ('basvuru-alindi', 'daha-once') %}disabled{% endif %}>
-            {% endif %}
           </td>
           <td class="num">{{ loop.index }}</td>
           <td class="baslik"><a href="{{ j['url'] }}" target="_blank">{{ j['title'] }}</a>
@@ -49,15 +48,14 @@
           <td class="yer">{{ j['location'] }}</td>
           <td class="eslesme">
             {% if j['match_state'] == 'uygun' %}<span class="badge ok">Uygun ({{ j['score'] }})</span>
-            {% elif j['match_state'] == 'dusuk' %}<span class="badge warn">Düşük ({{ j['score'] }})</span>
-            {% elif j['match_state'] == 'hariç' %}<span class="badge out">Hariç</span>
-            {% else %}<span class="badge none">Yok</span>{% endif %}
+            {% else %}<span class="badge warn">Düşük ({{ j['score'] }})</span>{% endif %}
           </td>
           <td>
             {% if j['applied'] %}<span class="badge once">Başvurulmuş</span>
             {% elif j['durum'] %}<span class="badge warn">{{ j['durum'] }}</span>{% endif %}
           </td>
         </tr>
+      {% endif %}
       {% endfor %}
       </tbody>
     </table>

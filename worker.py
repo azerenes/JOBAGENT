@@ -5,6 +5,7 @@ import time
 import uuid
 
 from browser import BrowserManager, DATA_DIR
+from cv_reader import normalize_turkish
 from matcher import build_keywords, parse_exclude, score_job
 from sites import get_adapter
 from sites.base import Job
@@ -110,11 +111,21 @@ def run_search(sid, status=None):
                               cv_keywords=s['keywords'])
         city = s['sehir'].lower()
         kept = []
+        seen = set()
         for j in jobs:
             loc = (j.location or '').lower()
             if loc and city not in loc and 'türkiye' not in loc and 'turkiye' not in loc:
                 continue
-            score_job(j, s['keywords'], s['exclude_list'])
+            score_job(j, s['keywords'], s['exclude_list'], s['meslek'])
+            if j.match_state == 'eslesme-yok':
+                continue
+            # ayni ilan kopya olarak gelirse tekle (url veya baslik+firma)
+            key = (j.site, j.url or '')
+            key2 = (j.site, normalize_turkish(j.title or ''), normalize_turkish(j.company or ''))
+            if key in seen or key2 in seen:
+                continue
+            seen.add(key)
+            seen.add(key2)
             kept.append(j)
         kept.sort(key=lambda j: (j.match_state == 'uygun', j.score), reverse=True)
         data = [j.to_dict() for j in kept]
