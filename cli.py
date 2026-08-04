@@ -170,7 +170,6 @@ def choose_ids(mapping, jobs_by_id, args):
 def main():
     if len(sys.argv) > 1 and sys.argv[1] == 'web':
         from app import app
-        from browser import load_config
         cfg = load_config()
         print(f'Web arayüzü: http://{cfg.get("host", "127.0.0.1")}:{cfg.get("port", 5000)} (Ctrl+C ile durur)')
         app.run(host=cfg.get('host', '127.0.0.1'), port=cfg.get('port', 5000), debug=False)

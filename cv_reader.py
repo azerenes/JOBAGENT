@@ -19,25 +19,25 @@ def normalize_turkish(s):
 
 
 def extract_text(path):
-    """PDF / DOCX / TXT / DOC dosyasindan duz metin cikarir."""
-    ext = (path or '').lower().rsplit('.', 1)[-1]
-    if ext == 'pdf':
-        from pypdf import PdfReader
-        r = PdfReader(path)
-        return '\n'.join((p.extract_text() or '') for p in r.pages)
-    if ext == 'docx':
-        import docx
-        d = docx.Document(path)
-        parts = [p.text for p in d.paragraphs]
-        for tb in d.tables:
-            for row in tb.rows:
-                parts += [c.text for c in row.cells]
-        return '\n'.join(parts)
-    if ext in ('txt', 'md', 'rtf'):
-        with open(path, encoding='utf-8', errors='replace') as f:
-            return f.read()
-    # bilinmeyen: metin olarak dene
+    """PDF / DOCX / TXT / DOC dosyasindan duz metin cikarir. Hata durumunda '' doner."""
     try:
+        ext = (path or '').lower().rsplit('.', 1)[-1]
+        if ext == 'pdf':
+            from pypdf import PdfReader
+            r = PdfReader(path)
+            return '\n'.join((p.extract_text() or '') for p in r.pages)
+        if ext == 'docx':
+            import docx
+            d = docx.Document(path)
+            parts = [p.text for p in d.paragraphs]
+            for tb in d.tables:
+                for row in tb.rows:
+                    parts += [c.text for c in row.cells]
+            return '\n'.join(parts)
+        if ext in ('txt', 'md', 'rtf'):
+            with open(path, encoding='utf-8', errors='replace') as f:
+                return f.read()
+        # bilinmeyen: metin olarak dene
         with open(path, encoding='utf-8', errors='replace') as f:
             return f.read()
     except Exception:

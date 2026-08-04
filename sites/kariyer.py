@@ -24,12 +24,20 @@ class KariyerAdapter(SiteAdapter):
     def search(self, page, meslek, ek_kelime, sehir, sayfa=2, cv_keywords=None):
         terms = self.search_terms(meslek, ek_kelime, cv_keywords)
         cards = {}
+        challenged = False
         for term in terms:
             for cp in range(1, sayfa + 1):
                 url = f'{self.base}/is-ilanlari?keywords={term}&cityName={sehir}&cp={cp}'
                 try:
                     page.goto(url, timeout=45000, wait_until='domcontentloaded')
                     self._scroll(page)
+                    # bot dogrulamasi (px-captcha) tespiti
+                    try:
+                        if page.evaluate("() => !!document.querySelector('.px-captcha-container,[class*=px-captcha]')"):
+                            challenged = True
+                            t.sleep(3)
+                    except Exception:
+                        pass
                     found = page.evaluate('''() => {
                         const out = [];
                         document.querySelectorAll('a[href*="/is-ilani/"]').forEach(a=>{
@@ -64,6 +72,11 @@ class KariyerAdapter(SiteAdapter):
                 except Exception:
                     pass
                 t.sleep(1.0)
+        if not cards and challenged:
+            raise RuntimeError(
+                'Kariyer.net bot doğrulaması istedi (px-captcha). '
+                'Lütfen kariyer.net sitesine kendi tarayıcınızla giriş yapıp doğrulamayı geçin, '
+                'sonra bu aramayı tekrar çalıştırın.')
         return list(cards.values())
 
     def login_url(self):

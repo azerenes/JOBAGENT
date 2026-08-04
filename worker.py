@@ -186,7 +186,10 @@ def run_apply(sid, selected_ids, status=None, ask=None, bank=None):
         for j in jobs:
             if status:
                 status('islemde', done, total, j.title)
-            durum = adapter.apply(page, j, ask=ask, bank=bank)
+            try:
+                durum = adapter.apply(page, j, ask=ask, bank=bank)
+            except Exception as e:
+                durum = 'hata:' + type(e).__name__
             done += 1
             _set_job_durum(sid, j.job_id, durum, done, total, j.title)
             if status:
